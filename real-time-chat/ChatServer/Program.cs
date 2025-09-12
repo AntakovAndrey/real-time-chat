@@ -1,4 +1,4 @@
-using chat_server;
+using ChatServer.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 

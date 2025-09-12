@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
-namespace chat_server;
+namespace ChatServer.Hubs;
 
 public class ChatHub : Hub
 {
@@ -8,5 +8,4 @@ public class ChatHub : Hub
     {
         await Clients.All.SendAsync("Receive", message, cancellationToken);
     }
-        
 }
