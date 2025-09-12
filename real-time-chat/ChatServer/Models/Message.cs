@@ -4,6 +4,7 @@ public class Message
 {
     public Guid Id { get; set; }
     public string? Content { get; set; }
+    public List<File>? Files { get; set; }
     public DateTime Date { get; set; }
     public Guid ChatId { get; set; }
     public Chat? Chat { get; set; }

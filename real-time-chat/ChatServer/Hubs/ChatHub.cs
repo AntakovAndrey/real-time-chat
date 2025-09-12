@@ -4,8 +4,8 @@ namespace ChatServer.Hubs;
 
 public class ChatHub : Hub
 {
-    public async Task Send(string message, CancellationToken cancellationToken)
+    public async Task Send(string message)
     {
-        await Clients.All.SendAsync("Receive", message, cancellationToken);
+        await Clients.All.SendAsync("Receive", message);
     }
 }
