@@ -32,8 +32,10 @@ public class UserService : IUserService
         }
         var addingUser = new User
         {
-            Email = user.Email,
             Name = user.Username,
+            Surname = user.Surname,
+            Username = user.Username,
+            Email = user.Email,
             Password = user.Password
         };
         await _userRepository.CreateAsync(addingUser, cancellationToken);
