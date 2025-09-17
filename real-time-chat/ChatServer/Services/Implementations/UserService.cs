@@ -32,7 +32,7 @@ public class UserService : IUserService
         }
         var addingUser = new User
         {
-            Name = user.Username,
+            Name = user.Name,
             Surname = user.Surname,
             Username = user.Username,
             Email = user.Email,

@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
+builder.Services.AddCors();
 builder.Services.Configure<AuthConfiguration>(
     builder.Configuration.GetSection("Auth"));
 builder.Services.AddDbContext<IAppDbContext, AppDbContext>(options =>
@@ -28,7 +28,21 @@ builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
 
+builder.Services.AddOpenApi();
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
+app.UseCors(options =>
+    options.AllowAnyOrigin()
+        .AllowAnyMethod()
+        .AllowAnyHeader());
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+    app.MapOpenApi();
+}
+
 app.UseHttpsRedirection();
 app.UseDefaultFiles();
 app.UseStaticFiles();
