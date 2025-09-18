@@ -31,7 +31,7 @@ public class SearchController :Controller
     }
     
     [Authorize]
-    [HttpGet("chatSearch")]
+    [HttpGet("chatSearch/{searchTerm}")]
     public async Task<IActionResult> ChatSearch(string searchTerm, CancellationToken cancellationToken)
     {
         var userClaimId = HttpContext.User.FindFirst("id")?.Value;
@@ -45,7 +45,7 @@ public class SearchController :Controller
     }
     
     [Authorize]
-    [HttpGet("messageSearch")]
+    [HttpGet("messageSearch/{searchTerm}")]
     public async Task<IActionResult> MessageSearch(string searchTerm, CancellationToken cancellationToken)
     {
         var userClaimId = HttpContext.User.FindFirst("id")?.Value;
@@ -59,7 +59,7 @@ public class SearchController :Controller
     }
     
     [Authorize]
-    [HttpGet("userSearch")]
+    [HttpGet("userSearch/{searchTerm}")]
     public async Task<IActionResult> UserSearch(string searchTerm, CancellationToken cancellationToken)
     {
         var userClaimId = HttpContext.User.FindFirst("id")?.Value;
