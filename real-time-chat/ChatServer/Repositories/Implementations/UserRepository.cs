@@ -49,6 +49,15 @@ public class UserRepository : IUserRepository
 
     public async Task UpdateAsync(Guid id, User user, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        await _dbContext.Users.Where(u => u.Id == id)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(s=>s.Name, user.Name)
+                .SetProperty(s=>s.Surname, user.Surname)
+                .SetProperty(s=>s.Email, user.Email)
+                .SetProperty(s=>s.Password, user.Password)
+                .SetProperty(s=>s.Username, user.Username),
+                cancellationToken
+            );
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

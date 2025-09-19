@@ -9,5 +9,5 @@ public interface IChatRepository
     public Task<List<Chat>> GetAllAsync(CancellationToken cancellationToken);
     public Task UpdateAsync(Guid id, Chat chat, CancellationToken cancellationToken);
     public Task DeleteAsync(Guid id, CancellationToken cancellationToken);    
-    public Task<List<Message>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken);
+    public Task<List<Chat>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken);
 }
