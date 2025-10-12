@@ -1,6 +1,8 @@
 ﻿using System.Security.Claims;
 using ChatServer.Dto;
+using ChatServer.Services.Implementations;
 using ChatServer.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace ChatServer.Hubs;
@@ -8,36 +10,34 @@ namespace ChatServer.Hubs;
 public class ChatHub : Hub
 {
     private readonly IMessageService _messageService;
-
-    public ChatHub(IMessageService messageService)
+    private readonly IChatService _chatService;
+    
+    public ChatHub(IMessageService messageService, IChatService chatService)
     {
         _messageService = messageService;
+        _chatService = chatService;
     }
-        
-    //ToDo: divide client to groups by chatId
-    //ToDo: implement message history load after join chat
-    public async Task SendMessage(Guid chatId, string content)
+
+    [Authorize]
+    public override async Task OnConnectedAsync()
     {
-        var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out Guid userGuid))
+        var userId = Context.User.FindFirstValue("id");
+        await Groups.AddToGroupAsync(Context.ConnectionId, userId);
+        foreach (var chat in await _chatService.GetChatsByUserId(new Guid(userId), CancellationToken.None))
         {
-            throw new HubException("User not authenticated");
+            Groups.AddToGroupAsync(Context.ConnectionId, chat.Id.ToString());
         }
-        var message = new AddMessageDto
-        {
-            Content = content,
-            Date = DateTime.UtcNow,
-            ChatId = chatId,
-            UserSentId = userGuid
-        };
-        await _messageService.AddMessage(message);
-        await Clients.Group(chatId.ToString()).SendAsync("ReceiveMessage", message);
+    }
+
+    public override async Task OnDisconnectedAsync(Exception exception)
+    {
+        var userId = Context.User.FindFirstValue("id");
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, userId);
     }
     
-    public async Task JoinChat(Guid chatId)
+    public async Task SendMessage(AddMessageDto messageDto)
     {
-        await Groups.AddToGroupAsync(Context.ConnectionId, chatId.ToString());
-        var messages = await _messageService.GetMessagesByChatId(chatId,skip:0,take:100);
-        await Clients.Caller.SendAsync("ReceiveMessageHistory", messages);
+        var addedMessage = await _messageService.AddMessage(messageDto);
+        await Clients.Group(messageDto.ChatId.ToString()).SendAsync("ReceiveMessage", addedMessage);
     }
 }

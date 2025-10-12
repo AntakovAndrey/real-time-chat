@@ -1,4 +1,5 @@
 ﻿using ChatClientWpf.Services.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ChatClientWpf.ViewModels
 {
@@ -7,7 +8,7 @@ namespace ChatClientWpf.ViewModels
         private BaseViewModel _currentViewModel;
         private readonly IServiceProvider _services;
         private readonly ITokenStorage _tokenStorage;
-        
+                
         public BaseViewModel CurrentViewModel
         {
             get => _currentViewModel;
@@ -21,9 +22,8 @@ namespace ChatClientWpf.ViewModels
         public MainViewModel(IServiceProvider services, ITokenStorage tokenStorage)
         {
             _services = services;
-            _tokenStorage = tokenStorage;
-            var isTokenExists = _tokenStorage.IsTokenExistsAsync().GetAwaiter().GetResult();
-            if (isTokenExists)
+            _tokenStorage = services.GetRequiredService<ITokenStorage>();
+            if (tokenStorage.IsTokenExists())
             {
                 NavigateToChat();
             }
@@ -32,7 +32,6 @@ namespace ChatClientWpf.ViewModels
                 NavigateToLogin();
             }
         }
-        
         
         public void NavigateToLogin()
         {
@@ -46,7 +45,7 @@ namespace ChatClientWpf.ViewModels
         
         public void NavigateToChat()
         {
-            CurrentViewModel = new ChatViewModel(this);
+            CurrentViewModel = new ChatViewModel(this, _services);
         }
     }
 }

@@ -1,0 +1,13 @@
+﻿using ChatServer.Enums;
+using ChatServer.Models;
+
+namespace ChatServer.Dto;
+
+public class GetChatDto
+{
+    public Guid Id { get; set; }
+    public ChatType Type { get; set; }
+    public string? Name { get; set; }
+    public List<UserDto> Users { get; set; }
+    public List<GetMessageDto?> Messages { get; set; }
+}

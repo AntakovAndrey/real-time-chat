@@ -24,7 +24,9 @@ public class MessageRepository : IMessageRepository
     {
         try
         {
-            var message = await _dbContext.Messages.FirstAsync(u=>u.Id == messageId, cancellationToken);
+            var message = await _dbContext.Messages
+                .Include(m=>m.UserSent)
+                .FirstAsync(u=>u.Id == messageId, cancellationToken);
             return message;
         }
         catch (Exception ex)
@@ -35,14 +37,16 @@ public class MessageRepository : IMessageRepository
 
     public async Task<List<Message>> GetAllAsync(CancellationToken cancellationToken)
     {
-        var foundMessages = await _dbContext.Messages.AsNoTracking()
+        var foundMessages = await _dbContext.Messages
+            .AsNoTracking()
             .ToListAsync(cancellationToken);
         return foundMessages;
     }
 
     public async Task UpdateAsync(Guid id, Message message, CancellationToken cancellationToken)
     {
-        await _dbContext.Messages.Where(m => m.Id == id)
+        await _dbContext.Messages
+            .Where(m => m.Id == id)
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(m=>m.Content, message.Content)
                 .SetProperty(m=>m.Date, message.Date),
@@ -53,15 +57,18 @@ public class MessageRepository : IMessageRepository
 
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
     {
-        await _dbContext.Messages.Where(s => s.Id == id)
+        await _dbContext.Messages
+            .Where(s => s.Id == id)
             .ExecuteDeleteAsync(cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<List<Message>> GetMessagesByChatIdAsync(Guid chatId, CancellationToken cancellationToken)
     {
-        var foundMessages = await _dbContext.Messages.AsNoTracking()
-            .Where(u=>u.ChatId == chatId)
+        var foundMessages = await _dbContext.Messages
+            .AsNoTracking()
+            .Include(c=>c.UserSent)
+            .Where(c=>c.ChatId == chatId)
             .ToListAsync(cancellationToken);
         return foundMessages;
     }

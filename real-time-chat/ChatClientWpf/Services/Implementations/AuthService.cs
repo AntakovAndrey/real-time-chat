@@ -1,5 +1,6 @@
 ﻿using ChatClientWpf.Dto;
 using ChatClientWpf.Exceptions;
+using ChatClientWpf.Models;
 using ChatClientWpf.Services.Interfaces;
 
 namespace ChatClientWpf.Services.Implementations;
@@ -13,21 +14,14 @@ public class AuthService : IAuthService
         _apiProvider = apiProvider;
     }
     
-    public async Task<string> Login(string username, string password)
+    public async Task<StoredToken> Login(LoginDto loginDto)
     {
-        throw new NotImplementedException();
+        var token = await _apiProvider.Login(loginDto);
+        return token;
     }
 
     public async Task Register(RegisterDto registerDto)
     {
-        try
-        {
-            await _apiProvider.RegisterUser(registerDto);
-        }
-        catch (ServerNotRespondsException ex)
-        {
-            throw;
-        }
-        
+        await _apiProvider.RegisterUser(registerDto);
     }
 }

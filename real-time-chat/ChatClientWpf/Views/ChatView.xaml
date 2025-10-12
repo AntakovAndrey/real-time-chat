@@ -3,16 +3,122 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:views="clr-namespace:ChatClientWpf.Views"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="800">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition MinWidth="250" Width="250"/>
+            <ColumnDefinition MinWidth="200" Width="250" MaxWidth="500"/>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <Button>afsd</Button>
-        <GridSplitter Grid.Column="1" ShowsPreview="False" Width="2"
-                      HorizontalAlignment="Center" VerticalAlignment="Stretch"></GridSplitter>
+        
+        <GridSplitter Grid.Column="1" ShowsPreview="False" Width="3"
+            HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
+        
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Background="#F5F5F5" Height="50">
+                <Button Command="{Binding OpenSettingsCommand}" Style="{StaticResource SidebarButton}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⚙️" FontSize="16" Margin="0,0,5,0"/>
+                        <TextBlock Text="Настройки" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        
+            <Border Grid.Row="1" Background="White" Padding="10">
+                <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
+                         Padding="10,5" 
+                         Background="#F0F0F0"
+                         BorderThickness="0"
+                         VerticalContentAlignment="Center">
+                </TextBox>
+            </Border>
+
+            <Grid Grid.Row="2">
+                <Border Background="#CCFFFFFF" 
+                        Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        Panel.ZIndex="10">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <ProgressBar IsIndeterminate="True" Width="200" Height="20" Margin="0,0,0,10"/>
+                        <TextBlock Text="{Binding LoadingMessage}" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <views:SearchResultView DataContext="{Binding SearchResultsViewModel}"
+                                        Visibility="{Binding IsSearchActive, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                
+                <ListBox ItemsSource="{Binding Chats}"
+                         SelectedItem="{Binding SelectedChat}"
+                         Visibility="{Binding IsSearchActive, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Reverse}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                    
+                                
+                                <TextBlock Text="{Binding Avatar}" FontSize="20" Margin="0,0,10,0"
+                                           VerticalAlignment="Center" Grid.Column="0"/>
+                                           <TextBlock Text="{Binding LastMessage}" Foreground="Gray" TextTrimming="CharacterEllipsis"
+                                               FontSize="12" Margin="0,2,0,0"/>
+                                               
+                                               <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                    <TextBlock Text="{Binding LastMessageTime, StringFormat=HH:mm}" 
+                                               Foreground="Gray" FontSize="11"/>
+                                    <Border Background="Red" HorizontalAlignment="Right" CornerRadius="10" 
+                                            Margin="0,5,0,0" 
+                                            Visibility="{Binding UnreadCount, Converter={StaticResource ZeroToCollapsedConverter}}">
+                                        <TextBlock Text="{Binding UnreadCount}" Foreground="White" FontSize="11"
+                                                   Margin="5,2" HorizontalAlignment="Center"/>
+                                    </Border>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Grid>
+        
+        <ContentControl Grid.Column="2" Content="{Binding ChatAreaViewModel}">
+            <ContentControl.Style>
+                <Style TargetType="ContentControl">
+                    <Setter Property="ContentTemplate">
+                        <Setter.Value>
+                            <DataTemplate>
+                                <views:ChatAreaView DataContext="{Binding}"/>
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding SelectedChat}" Value="{x:Null}">
+                            <Setter Property="ContentTemplate">
+                                <Setter.Value>
+                                    <DataTemplate>
+                                        <Border Background="White">
+                                            <TextBlock Text="Выберите чат для начала общения" 
+                                                       VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                       Foreground="Gray" FontSize="16"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ContentControl.Style>
+        </ContentControl>
     </Grid>
 </UserControl>

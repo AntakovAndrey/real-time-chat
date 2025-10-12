@@ -65,7 +65,7 @@ public class UserService : IUserService
     public async Task<UserDto> AuthenticateAsync(LoginDto loginDto, CancellationToken cancellationToken)
     {
         var foundUser = (await _userRepository.GetAllAsync(cancellationToken: cancellationToken))
-            .FirstOrDefault(x=>x.Name==loginDto.Username && x.Password == loginDto.Password);
+            .FirstOrDefault(x => x.Username == loginDto.Username && x.Password == loginDto.Password);
         if (foundUser == null)
         {
             throw new InvalidDataException("Invalid login or password");
@@ -74,7 +74,7 @@ public class UserService : IUserService
         {
             Id = foundUser.Id,
             Email = foundUser.Email,
-            Username = foundUser.Name,
+            Username = foundUser.Username,
         };
     }
 }

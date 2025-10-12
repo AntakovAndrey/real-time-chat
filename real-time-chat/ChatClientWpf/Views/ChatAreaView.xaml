@@ -1,0 +1,106 @@
+﻿<UserControl x:Class="ChatClientWpf.Views.ChatAreaView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800">
+    
+    
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <Border Grid.Row="0" Background="#F0F0F0" Padding="15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock Grid.Column="0" Text="{Binding CurrentChat.Avatar}" 
+                           FontSize="20" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding CurrentChat.Name}" FontWeight="Bold" FontSize="14"/>
+                    <TextBlock Text="{Binding CurrentChat.LastMessage}" Foreground="Gray" FontSize="12"
+                               TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button Content="ℹ️" ToolTip="Информация о чате" 
+                            Background="Transparent" BorderThickness="0" FontSize="16"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" 
+                      x:Name="MessagesScrollViewer">
+            <ItemsControl ItemsSource="{Binding Messages}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{Binding IsMine, Converter={StaticResource BoolToMessageStyleConverter}}">
+                            <StackPanel>
+                                <TextBlock Text="{Binding SenderName}" FontWeight="Bold" 
+                                           Visibility="{Binding IsMine, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Reverse}"
+                                           Foreground="#2A8CFF" FontSize="12"/>
+                                <TextBlock Text="{Binding Content}" TextWrapping="Wrap" 
+                                           Margin="0,2,0,0"/>
+                                <TextBlock Text="{Binding SentAt, StringFormat=HH:mm}" 
+                                           Foreground="Gray" FontSize="10" 
+                                           HorizontalAlignment="Right" Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+        
+        <Border Grid.Row="2" Background="#F0F0F0" Padding="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="📎" Background="Transparent" BorderThickness="0" 
+                            FontSize="16" ToolTip="Прикрепить файл"/>
+                    <Button Content="😊" Background="Transparent" BorderThickness="0" 
+                            FontSize="16" ToolTip="Эмодзи" Margin="5,0,0,0"/>
+                </StackPanel>
+                
+                <TextBox Grid.Column="1" Text="{Binding NewMessage, UpdateSourceTrigger=PropertyChanged}" 
+                         Padding="15,10" Margin="10,0" VerticalContentAlignment="Center"
+                         BorderThickness="0" Background="White" 
+                         FontSize="14" AcceptsReturn="True" 
+                         VerticalScrollBarVisibility="Auto" MinHeight="40"
+                         PreviewKeyDown="TextBox_PreviewKeyDown">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox">
+                            <Style.Triggers>
+                                <Trigger Property="Text" Value="">
+                                    <Setter Property="Background" Value="#F5F5F5"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+                
+                <Button Grid.Column="2" Content="➤"
+                        Click="ButtonBase_OnClick"
+                        Command="{Binding DataContext.SendMessageCommand}"
+                        CommandParameter="{x:Null}"
+                        Background="#0084FF" Foreground="White" BorderThickness="0"
+                        Width="40" Height="40" FontSize="16" FontWeight="Bold"
+                        ToolTip="Отправить сообщение"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

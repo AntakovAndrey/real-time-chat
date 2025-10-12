@@ -1,5 +1,5 @@
-﻿using System.Configuration;
-using System.Windows;
+﻿using System.Windows;
+using ChatClientWpf.Configuration;
 using ChatClientWpf.Services.Implementations;
 using ChatClientWpf.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,24 +19,27 @@ namespace ChatClientWpf
                 .Build();
         }
     
-        private void ConfigureServices(IServiceCollection services)
+        private void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
+            services.Configure<ApiConfiguration>(context.Configuration.GetSection("ApiConfiguration"));
             services.AddTransient<ITokenStorage, JwtTokenStorage>();
             services.AddTransient<IApiProvider, ApiProvider>();
             services.AddTransient<IAuthService, AuthService>();
-            
+            services.AddTransient<ISearchService, SearchService>();
+            services.AddTransient<IChatService, ChatService>();
+            services.AddTransient<IMessageService, MessageService>();
             services.AddTransient<LoginViewModel>();
-            services.AddTransient<MainViewModel>();
-            services.AddTransient<MainWindow>();
-            
+            services.AddSingleton<MainViewModel>();
+            services.AddSingleton<MainWindow>();
         }
 
         protected override async void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
             await _host.StartAsync();
-            var mainWindow = _host.Services.GetService<MainWindow>();
-            mainWindow.DataContext = _host.Services.GetService<MainViewModel>();
+            var mainWindow = _host.Services.GetRequiredService<MainWindow>();
+            var mainViewModel = _host.Services.GetRequiredService<MainViewModel>();
+            mainWindow.DataContext = mainViewModel;
             mainWindow.Show();
         }
 

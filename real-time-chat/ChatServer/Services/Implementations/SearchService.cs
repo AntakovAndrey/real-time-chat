@@ -1,4 +1,5 @@
 ﻿using ChatServer.Dto;
+using ChatServer.Models;
 using ChatServer.Repositories.Interfaces;
 using ChatServer.Services.Interfaces;
 
@@ -30,17 +31,44 @@ public class SearchService : ISearchService
                 Username = x.Username,
                 Email = x.Email
             }).ToList();
-        var chats = (await _chatRepository.GetByUserIdAsync(userId ,cancellationToken))
-            .Where(x => x.Name != null && x.Name.ToLower().Contains(searchTerm.ToLower())).Take(5)
-            .Select(x=>new GetChatDto
+        var chats = (await _chatRepository.GetByUserIdAsync(userId, cancellationToken))
+            .Where(x => x.Name != null && x.Name.ToLower().Contains(searchTerm.ToLower()))
+            .Take(5)
+            .Select(x => new GetChatDto
             {
                 Id = x.Id,
                 Name = x.Name,
                 Type = x.Type,
-                Users = x.Users,
-                Messages = x.Messages,
+                Users = x.Users?.Select(user => new UserDto
+                {
+                    Id = user.Id,
+                    Username = user.Username,
+                    Email = user.Email
+                }).ToList() ?? new List<UserDto>(),
+                Messages = x.Messages?.Select(message =>
+                    {
+                        if (message.UserSent != null)
+                            return new GetMessageDto
+                            {
+                                Id = message.Id,
+                                Content = message.Content,
+                                Files = message.Files,
+                                Date = message.Date,
+                                ChatId = message.ChatId,
+                                UserSentId = message.UserSentId,
+                                UserSent = new UserDto
+                                {
+                                    Id = message.UserSentId,
+                                    Email = message.UserSent.Email,
+                                    Username = message.UserSent.Username,
+                                }
+                            };
+                        return null;
+                    })
+                    .Where(msg => msg != null)
+                    .ToList() ?? new List<GetMessageDto>()
             }).ToList();
-        var messages = (await _chatRepository.GetByUserIdAsync(userId ,cancellationToken))
+        var messages = (await _chatRepository.GetByUserIdAsync(userId, cancellationToken))
             .SelectMany(x=>x.Messages)
             .Where(x=>x.Content != null && x.Content.ToLower().Contains(searchTerm.ToLower()))
             .Take(5)
@@ -51,6 +79,12 @@ public class SearchService : ISearchService
                 Files = x.Files,
                 Date = x.Date,
                 ChatId = x.ChatId,
+                UserSent = new UserDto
+                {
+                    Id = x.UserSentId,
+                    Email = x.UserSent.Email,
+                    Username = x.UserSent.Username,
+                },
                 UserSentId = x.UserSentId
             }).ToList();
         var searchResult = new QuickSearchResultDto
@@ -61,18 +95,44 @@ public class SearchService : ISearchService
         };
         return searchResult;
     }
-
+    
     public async Task<List<GetChatDto>> ChatSearch(string searchTerm, Guid userId, CancellationToken cancellationToken)
     {
-        var chats = (await _chatRepository.GetByUserIdAsync(userId ,cancellationToken))
+        var chats = (await _chatRepository.GetByUserIdAsync(userId, cancellationToken))
             .Where(x => x.Name != null && x.Name.ToLower().Contains(searchTerm.ToLower()))
-            .Select(x=>new GetChatDto
+            .Select(x => new GetChatDto
             {
                 Id = x.Id,
                 Name = x.Name,
                 Type = x.Type,
-                Users = x.Users,
-                Messages = x.Messages,
+                Users = x.Users?.Select(user => new UserDto
+                {
+                    Id = user.Id,
+                    Username = user.Username,
+                    Email = user.Email
+                }).ToList() ?? new List<UserDto>(),
+                Messages = x.Messages?.Select(message =>
+                    {
+                        if (message.UserSent != null)
+                            return new GetMessageDto
+                            {
+                                Id = message.Id,
+                                Content = message.Content,
+                                Files = message.Files,
+                                Date = message.Date,
+                                ChatId = message.ChatId,
+                                UserSentId = message.UserSentId,
+                                UserSent = new UserDto
+                                {
+                                    Id = message.UserSentId,
+                                    Email = message.UserSent.Email,
+                                    Username = message.UserSent.Username,
+                                }
+                            };
+                        return null;
+                    })
+                    .Where(msg => msg != null)
+                    .ToList() ?? new List<GetMessageDto>()
             }).ToList();
         return chats;
     }
@@ -95,7 +155,7 @@ public class SearchService : ISearchService
 
     public async Task<List<GetMessageDto>> MessageSearch(string searchTerm, Guid userId, CancellationToken cancellationToken)
     {
-        var messages = (await _chatRepository.GetByUserIdAsync(userId ,cancellationToken))
+        var messages = (await _chatRepository.GetByUserIdAsync(userId, cancellationToken))
             .SelectMany(x=>x.Messages)
             .Where(x=>x.Content != null && x.Content.ToLower().Contains(searchTerm.ToLower()))
             .Select(x=> new GetMessageDto
@@ -105,6 +165,12 @@ public class SearchService : ISearchService
                 Files = x.Files,
                 Date = x.Date,
                 ChatId = x.ChatId,
+                UserSent = new UserDto
+                {
+                    Id = x.UserSentId,
+                    Email = x.UserSent.Email,
+                    Username = x.UserSent.Username,
+                },
                 UserSentId = x.UserSentId
             }).ToList();
         return messages;

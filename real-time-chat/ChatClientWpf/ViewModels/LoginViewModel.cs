@@ -1,29 +1,32 @@
 ﻿using System.Windows.Input;
+using ChatClientWpf.Dto;
+using ChatClientWpf.Services.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ChatClientWpf.ViewModels
 {
     public class LoginViewModel : BaseViewModel
     {
+        private readonly IAuthService _authService;
+        private readonly ITokenStorage _tokenStorage;
         private readonly MainViewModel _mainViewModel;
-        private string _username;
-        private string _password;
+        private LoginDto loginDto;
         
         public string Username
         {
-            get => _username;
+            get => loginDto.Username;
             set
             {
-                _username = value;
+                loginDto.Username = value;
                 OnPropertyChanged();
             }
         }
-        
         public string Password
         {
-            get => _password;
+            get => loginDto.Password;
             set
             {
-                _password = value;
+                loginDto.Password = value;
                 OnPropertyChanged();
             }
         }
@@ -33,24 +36,19 @@ namespace ChatClientWpf.ViewModels
         
         public LoginViewModel(MainViewModel mainViewModel, IServiceProvider serviceProvider)
         {
+            loginDto = new LoginDto();
             _mainViewModel = mainViewModel;
-            
+            _tokenStorage = serviceProvider.GetRequiredService<ITokenStorage>();
+            _authService = serviceProvider.GetRequiredService<IAuthService>();
             LoginCommand = new RelayCommand(async () => await LoginAsync());
             NavigateToRegisterCommand = new RelayCommand(() => _mainViewModel.NavigateToRegister());
         }
         
         private async Task LoginAsync()
         {
-            /*
-            // Здесь реализация логики авторизации
-            if (await AuthService.LoginAsync(Username, Password))
-            {
-                _mainViewModel.NavigateToChat();
-            }
-            else
-            {
-                MessageBox.Show("Ошибка авторизации");
-            }*/
+            var token = await _authService.Login(loginDto);
+            await _tokenStorage.SetTokenAsync(token);
+            _mainViewModel.NavigateToChat();
         }
     }
 }

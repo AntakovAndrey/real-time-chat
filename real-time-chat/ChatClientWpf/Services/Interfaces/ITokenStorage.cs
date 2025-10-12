@@ -1,9 +1,11 @@
-﻿namespace ChatClientWpf.Services.Interfaces;
+﻿using ChatClientWpf.Models;
+
+namespace ChatClientWpf.Services.Interfaces;
 
 public interface ITokenStorage
 {
-    public Task<string?> GetToken();
-    public Task<bool> IsTokenExistsAsync();
-    public Task SetToken(string token);
-    public Task ClearToken();
+    public Task<StoredToken?> GetTokenAsync();
+    public bool IsTokenExists();
+    public Task SetTokenAsync(StoredToken token);
+    public Task ClearTokenAsync();
 }
